@@ -25,7 +25,31 @@ const authSupabase = createClient(
 );
 
 // ── セキュリティ設定 ─────────────────────────────────────────
-app.use(helmet());
+const supabaseHost = (() => {
+  try {
+    return new URL(process.env.REACT_APP_SUPABASE_URL).host;
+  } catch {
+    return null;
+  }
+})();
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      connectSrc: [
+        "'self'",
+        "https://api.stripe.com",
+        "https://*.stripe.com",
+        supabaseHost ? `https://${supabaseHost}` : null,
+        supabaseHost ? `wss://${supabaseHost}` : null,
+      ].filter(Boolean),
+      scriptSrc: ["'self'", "https://js.stripe.com"],
+      frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+    },
+  },
+}));
 const allowedOrigins = [
   "http://localhost:3000",
   "https://localhost:3000",
