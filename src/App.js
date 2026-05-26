@@ -103,18 +103,19 @@ function AuthPage({ onAuth }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [done, setDone] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setLoading(true); setError(null);
+    setLoading(true); setError(null); setSuccess(null);
 
     if (mode === "reset") {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin,
       });
       if (error) { setError(error.message); setLoading(false); return; }
-      setError("パスワードリセット用のメールを送りました。メールのリンクを確認してください。");
+      setSuccess("パスワードリセット用のメールを送りました。メールのリンクを確認してください。");
       setLoading(false);
       return;
     }
@@ -188,17 +189,18 @@ function AuthPage({ onAuth }) {
             </div>
           )}
           {error && <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm">⚠️ {error}</div>}
+          {success && <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-emerald-400 text-sm">✓ {success}</div>}
           <button type="submit" disabled={loading}
             className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 font-black py-3 rounded-xl hover:brightness-110 disabled:opacity-40 transition">
             {loading ? "処理中..." : mode === "login" ? "ログイン" : mode === "signup" ? "登録する" : "リセットメールを送る"}
           </button>
         </form>
         <div className="text-center mt-4 space-y-2">
-          <button onClick={()=>{ setError(null); setMode(mode==="login"?"signup":"login"); }} className="block w-full text-zinc-500 text-sm hover:text-white transition">
+          <button onClick={()=>{ setError(null); setSuccess(null); setMode(mode==="login"?"signup":"login"); }} className="block w-full text-zinc-500 text-sm hover:text-white transition">
             {mode === "login" ? "アカウントを作成する →" : "← ログインへ戻る"}
           </button>
           {mode === "login" && (
-            <button onClick={()=>{ setError(null); setMode("reset"); }} className="block w-full text-zinc-600 text-xs hover:text-yellow-400 transition">
+            <button onClick={()=>{ setError(null); setSuccess(null); setMode("reset"); }} className="block w-full text-zinc-600 text-xs hover:text-yellow-400 transition">
               パスワードを忘れた方
             </button>
           )}
